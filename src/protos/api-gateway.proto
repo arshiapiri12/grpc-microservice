@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package apiGateway;
+
+import "commons.proto";
+
+service ApiGatewayService {
+  rpc test(commons.Empty) returns (commons.Empty) {}
+}

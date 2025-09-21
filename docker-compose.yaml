@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  api:
+    container_name: api-gateway
+    image: api-gateway:2.0.0
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    command: [sh, -c, 'yarn start:dev']
+    env_file:
+      - ./.env
+    ports:
+      - 3000:3000
+    networks:
+      - surprisin-network
+    extra_hosts:
+      # set INTERNAL_HOST=host.docker.internal in .env on linux
+      - ${INTERNAL_HOST:-INTERNAL_HOST}:host-gateway
+
+networks:
+  surprisin-network:
+    driver: bridge

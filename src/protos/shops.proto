@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package shops;
+
+import "commons.proto";
+
+service ShopsService {
+  rpc create(CreateShopDto) returns (ShopRo) {}
+  rpc update(UpdateShopDto) returns (commons.Empty) {}
+  rpc get(commons.IDDto) returns (ShopRo) {}
+  rpc find(ShopFindDto) returns (ShopsRo) {}
+  rpc delete(commons.IDDto) returns (commons.Empty) {}
+  rpc uploadFile(UploadFileDto) returns (UploadFileRo) {}
+  rpc download(DownloadDto) returns (stream DownloadRo) {}
+}
+
+message UploadFileDto {
+  bytes file = 1;
+  string filename = 2;
+}
+
+message DownloadDto {
+  string url = 1;
+}
+
+message DownloadRo {
+  bytes data = 1;
+}
+
+message CreateShopDto {
+  string username = 1;
+  string name = 2;
+  string image = 3;
+  string cover = 4;
+  string template = 5;
+  string description = 6;
+  repeated string tags = 7;
+  string owner = 8;
+}
+
+message UpdateShopDto {
+  string id = 1;
+  string name = 2;
+  string image = 3;
+  string cover = 4;
+  string template = 5;
+  string description = 6;
+  repeated string tags = 7;
+}
+
+message ShopFindDto {
+  uint32 page = 4;
+  uint32 size = 5;
+}
+
+message ShopRo {
+  string id = 1;
+  string owner = 2;
+  string username = 3;
+  string status = 4;
+  string name = 5;
+  string template = 6;
+  string image = 7;
+  string cover = 8;
+  string description = 9;
+  bool verified = 10;
+  repeated string tags = 11;
+}
+
+message ShopsRo {
+  repeated ShopRo shopsRo = 1;
+  uint32 count = 2;
+}
+
+message UploadFileRo {
+  string url = 1;
+}

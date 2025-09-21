@@ -1,0 +1,46 @@
+image: git.aminsys.com:8083/devops/deployment/dockerhub-images/docker:20.10.6
+
+variables:
+  CURRENT_BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  CURRENT_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN http://git.aminsys.com:8083
+  script:
+    - echo "Building ..."
+    - docker build -t $CURRENT_IMAGE -t $CURRENT_BRANCH_IMAGE -f ./Dockerfile .
+    - docker push $CURRENT_BRANCH_IMAGE
+    - docker push $CURRENT_IMAGE
+
+test:
+  stage: test
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN git.aminsys.com:8083
+  script:
+    - echo "Testing ..."
+
+deploy:
+  image: git.aminsys.com:8083/devops/deployment/dockerhub-images/ubuntu:20.04
+  stage: deploy
+  when: manual
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SWARM_MANAGER_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+  script:
+    - ssh $SWARM_MANAGER_USERNAME@$SWARM_MANAGER_IP "docker service update --image $CURRENT_IMAGE $SWARM_MANAGER_SERVICE_NAME"

@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - 3000:3000
+    command: yarn test:watch
+    env_file:
+      - ./.env
+    extra_hosts:
+      # set INTERNAL_HOST=host.docker.internal in .env on linux
+      - ${INTERNAL_HOST:-INTERNAL_HOST}:host-gateway
